@@ -8,14 +8,16 @@ import {
 import FormValidator from "./FormValidator";
 import Modal from "./Modal";
 
+// Komponen utama TodoList
 const TodoList = ({ history }) => {
-  const [id, setId] = useState("");
-  const [task, setTask] = useState("");
-  const [status, setStatus] = useState("0");
-  const [createdAt, setCreatedAt] = useState("");
-  const [isUpdate, setIsUpdate] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [items, setItems] = useState([]);
+  // State hooks untuk menyimpan nilai
+  const [id, setId] = useState(""); // Untuk menyimpan id dari item yang sedang diupdate
+  const [task, setTask] = useState(""); // Untuk menyimpan nama task
+  const [status, setStatus] = useState("0"); // Untuk menyimpan status dari task
+  const [createdAt, setCreatedAt] = useState(""); // Untuk menyimpan tanggal pembuatan task
+  const [isUpdate, setIsUpdate] = useState(false); // Untuk menentukan apakah sedang dalam mode update
+  const [errorMessage, setErrorMessage] = useState(""); // Untuk menyimpan pesan error
+  const [items, setItems] = useState([]); // Untuk menyimpan daftar item
   const [validation, setValidation] = useState(
     new FormValidator([
       {
@@ -32,36 +34,42 @@ const TodoList = ({ history }) => {
       },
     ]).valid()
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
-  const [deleteItemId, setDeleteItemId] = useState(null); // State to hold the item id to be deleted
+  const [searchTerm, setSearchTerm] = useState(""); // Untuk menyimpan kata kunci pencarian
+  const [filterStatus, setFilterStatus] = useState("all"); // Untuk menyimpan status filter
+  const [showModal, setShowModal] = useState(false); // Untuk mengontrol tampilan modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // State untuk modal konfirmasi hapus
+  const [deleteItemId, setDeleteItemId] = useState(null); // State untuk menyimpan id item yang akan dihapus
 
+  // UseEffect untuk mendapatkan semua item saat komponen di-mount
   useEffect(() => {
     const token = localStorage.usertoken;
     getAll(token);
   }, []);
 
+  // Fungsi untuk menangani perubahan input
   const onChange = (e) => {
     const { name, value } = e.target;
     if (name === "task") setTask(value);
     if (name === "status") setStatus(value);
   };
 
+  // Fungsi untuk menangani perubahan input pencarian
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
+  // Fungsi untuk menangani perubahan filter status
   const handleFilterChange = (e) => {
     setFilterStatus(e.target.value);
   };
 
+  // Fungsi untuk mendapatkan status dari kode status
   const getStatus = (statusCode) => {
     const statusArray = ["Do", "Done"];
     return statusArray[statusCode];
   };
 
+  // Fungsi untuk memformat tanggal
   const formatDate = (date) => {
     const monthNames = [
       "January",
@@ -86,6 +94,7 @@ const TodoList = ({ history }) => {
     );
   };
 
+  // Fungsi untuk mendapatkan semua item
   const getAll = (token) => {
     getList(token).then((data) => {
       if (data.status !== "success") {
@@ -97,6 +106,7 @@ const TodoList = ({ history }) => {
     });
   };
 
+  // Fungsi untuk menangani submit form penambahan task
   const onSubmit = (e) => {
     e.preventDefault();
     const validation = new FormValidator([
@@ -136,6 +146,7 @@ const TodoList = ({ history }) => {
     }
   };
 
+  // Fungsi untuk menangani submit form update task
   const onUpdate = (e) => {
     e.preventDefault();
     const validation = new FormValidator([
@@ -178,6 +189,7 @@ const TodoList = ({ history }) => {
     setStatus(0);
   };
 
+  // Fungsi untuk menangani klik edit
   const onEdit = (item_id, item, status, e) => {
     e.preventDefault();
     setId(item_id);
@@ -201,15 +213,17 @@ const TodoList = ({ history }) => {
         },
       ]).valid()
     );
-    setShowModal(true); // Show the modal on edit
+    setShowModal(true); // Tampilkan modal pada edit
   };
 
+  // Fungsi untuk menangani klik hapus
   const onDelete = (itemId, e) => {
     e.preventDefault();
-    setDeleteItemId(itemId); // Set the item id to be deleted
-    setShowDeleteModal(true); // Show the delete confirmation modal
+    setDeleteItemId(itemId); // Set id item yang akan dihapus
+    setShowDeleteModal(true); // Tampilkan modal konfirmasi hapus
   };
 
+  // Fungsi untuk konfirmasi hapus
   const confirmDelete = () => {
     const token = localStorage.usertoken;
     deleteItem(deleteItemId, token)
@@ -218,14 +232,15 @@ const TodoList = ({ history }) => {
           setErrorMessage(res.data.message);
         }
         getAll(token);
-        setShowDeleteModal(false); // Close the delete confirmation modal
-        setDeleteItemId(null); // Reset the item id to be deleted
+        setShowDeleteModal(false); // Tutup modal konfirmasi hapus
+        setDeleteItemId(null); // Reset id item yang akan dihapus
       })
       .catch((err) => {
         setErrorMessage(err.data.message);
       });
   };
 
+  // Filter item berdasarkan kata kunci pencarian dan status
   const filteredItems = items.filter((item) => {
     return (
       (filterStatus === "all" || item.status.toString() === filterStatus) &&
@@ -417,6 +432,7 @@ const TodoList = ({ history }) => {
   );
 };
 
+// Komponen modal konfirmasi hapus
 const DeleteConfirmationModal = ({
   showModal,
   setShowModal,

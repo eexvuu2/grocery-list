@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { login } from "./UserFunctions";
-import FormValidator from "./FormValidator";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
+import { login } from "./UserFunctions"; // Mengimpor fungsi login dari UserFunctions
+import FormValidator from "./FormValidator"; // Mengimpor kelas FormValidator untuk validasi formulir
+import { Link } from "react-router-dom/cjs/react-router-dom.min"; // Mengimpor komponen Link dari react-router-dom
 
+// Komponen Login adalah komponen fungsional yang menangani login pengguna
 const Login = ({ history }) => {
+  // State untuk menyimpan email, password, errors, dan validasi form
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -30,6 +32,7 @@ const Login = ({ history }) => {
     ]).valid()
   );
 
+  // Fungsi untuk menangani perubahan input pada form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "email") {
@@ -39,9 +42,11 @@ const Login = ({ history }) => {
     }
   };
 
+  // Fungsi untuk menangani submit form
   const handleFormSubmit = (event) => {
     event.preventDefault();
 
+    // Melakukan validasi form
     const validation = new FormValidator([
       {
         field: "email",
@@ -65,16 +70,18 @@ const Login = ({ history }) => {
 
     setValidation(validation);
 
+    // Jika validasi berhasil, maka lakukan login
     if (validation.isValid) {
       const user = { email, password };
       login(user).then((res) => {
         if (res) {
-          history.push(`/todo-list`);
+          history.push(`/todo-list`); // Redirect ke halaman todo-list jika login berhasil
         }
       });
     }
   };
 
+  // useEffect untuk mengecek apakah token pengguna ada di localStorage, jika ada, redirect ke halaman todo-list
   useEffect(() => {
     if (localStorage.getItem("usertoken")) {
       history.push(`/todo-list`);
@@ -85,6 +92,7 @@ const Login = ({ history }) => {
     <div className="bg-[#F4D4B6] h-[calc(100vh-72px)] lg:h-[calc(100vh-76px)] py-12 grid">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full gap-8">
+          {/* Kolom pertama yang berisi gambar dan teks */}
           <div className="w-full h-full bg-[#EDBD97] rounded-xl grid justify-items-center items-center order-2 lg:order-1">
             <div className="flex items-center flex-col gap-6">
               <img
@@ -99,12 +107,14 @@ const Login = ({ history }) => {
               </div>
             </div>
           </div>
+          {/* Kolom kedua yang berisi form login */}
           <div className="grid items-center order-1 lg:order-2">
             <div className="">
               <h1 className="text-3xl font-semibold mb-6 text-center">
                 Please Login
               </h1>
               <form className="space-y-4">
+                {/* Input untuk email */}
                 <div>
                   <label
                     htmlFor="email"
@@ -130,6 +140,7 @@ const Login = ({ history }) => {
                     </p>
                   )}
                 </div>
+                {/* Input untuk password */}
                 <div>
                   <label
                     htmlFor="password"
@@ -155,6 +166,7 @@ const Login = ({ history }) => {
                     </p>
                   )}
                 </div>
+                {/* Tombol login */}
                 <button
                   type="submit"
                   onClick={handleFormSubmit}
@@ -163,6 +175,7 @@ const Login = ({ history }) => {
                   Login
                 </button>
               </form>
+              {/* Teks untuk redirect ke halaman register */}
               <p className="mt-4 text-center text-md text-gray-600 font-bold">
                 Don't have an account?{" "}
                 <Link to="/register" className="text-[#398159]">
@@ -177,4 +190,5 @@ const Login = ({ history }) => {
   );
 };
 
+// Ekspor komponen Login untuk digunakan di tempat lain
 export default Login;

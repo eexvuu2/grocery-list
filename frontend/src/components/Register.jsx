@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { register } from "./UserFunctions";
-import FormValidator from "./FormValidator";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
+import { register } from "./UserFunctions"; // Mengimpor fungsi register dari UserFunctions
+import FormValidator from "./FormValidator"; // Mengimpor kelas FormValidator untuk validasi formulir
+import { Link } from "react-router-dom/cjs/react-router-dom.min"; // Mengimpor komponen Link dari react-router-dom
 
+// Komponen Register adalah komponen fungsional yang menangani pendaftaran pengguna
 const Register = ({ history }) => {
+  // State untuk menyimpan name, email, password, successMessage, dan validasi form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,6 +39,7 @@ const Register = ({ history }) => {
     ]).valid()
   );
 
+  // Fungsi untuk menangani perubahan input pada form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === "name") {
@@ -48,9 +51,11 @@ const Register = ({ history }) => {
     }
   };
 
+  // Fungsi untuk menangani submit form
   const handleFormSubmit = (event) => {
     event.preventDefault();
 
+    // Melakukan validasi form
     const validation = new FormValidator([
       {
         field: "email",
@@ -80,10 +85,12 @@ const Register = ({ history }) => {
 
     setValidation(validation);
 
+    // Jika validasi berhasil, maka lakukan pendaftaran
     if (validation.isValid) {
       const newUser = { name, email, password };
       register(newUser).then((res) => {
         setSuccessMessage("Registration successful! Redirecting to login...");
+        // Redirect ke halaman login setelah 2 detik
         setTimeout(() => {
           history.push(`/login`);
         }, 2000);
@@ -91,6 +98,7 @@ const Register = ({ history }) => {
     }
   };
 
+  // useEffect untuk mengecek apakah token pengguna ada di localStorage, jika ada, redirect ke halaman todo-list
   useEffect(() => {
     if (localStorage.getItem("usertoken")) {
       history.push(`/todo-list`);
@@ -101,6 +109,7 @@ const Register = ({ history }) => {
     <div className="bg-[#F4D4B6] h-[calc(100vh-72px)] lg:h-[calc(100vh-76px)] py-12 grid">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full gap-8">
+          {/* Kolom pertama yang berisi gambar dan teks */}
           <div className="w-full h-full bg-[#EDBD97] rounded-xl grid justify-items-center items-center order-2 lg:order-1">
             <div className="flex items-center flex-col gap-6">
               <img
@@ -115,6 +124,7 @@ const Register = ({ history }) => {
               </div>
             </div>
           </div>
+          {/* Kolom kedua yang berisi form registrasi */}
           <div className="grid items-center order-1 lg:order-2">
             <div className="">
               <h1 className="text-3xl font-semibold mb-6 text-center">
@@ -126,6 +136,7 @@ const Register = ({ history }) => {
                 </p>
               )}
               <form className="space-y-4">
+                {/* Input untuk nama */}
                 <div>
                   <label
                     htmlFor="name"
@@ -151,6 +162,7 @@ const Register = ({ history }) => {
                     </p>
                   )}
                 </div>
+                {/* Input untuk email */}
                 <div>
                   <label
                     htmlFor="email"
@@ -176,6 +188,7 @@ const Register = ({ history }) => {
                     </p>
                   )}
                 </div>
+                {/* Input untuk password */}
                 <div>
                   <label
                     htmlFor="password"
@@ -201,6 +214,7 @@ const Register = ({ history }) => {
                     </p>
                   )}
                 </div>
+                {/* Tombol register */}
                 <button
                   type="submit"
                   onClick={handleFormSubmit}
@@ -209,6 +223,7 @@ const Register = ({ history }) => {
                   Register
                 </button>
               </form>
+              {/* Teks untuk redirect ke halaman login */}
               <p className="mt-4 text-center text-md text-gray-600 font-bold">
                 Already have an account?{" "}
                 <Link to="/login" className="text-[#398159]">
@@ -223,4 +238,5 @@ const Register = ({ history }) => {
   );
 };
 
+// Ekspor komponen Register untuk digunakan di tempat lain
 export default Register;

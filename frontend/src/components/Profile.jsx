@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { getProfile, updatePassword } from "./UserFunctions";
-import FormValidator from "./FormValidator";
-import Modal from "./Modal";
+import { getProfile, updatePassword } from "./UserFunctions"; // Mengimpor fungsi getProfile dan updatePassword
+import FormValidator from "./FormValidator"; // Mengimpor FormValidator untuk validasi form
+import Modal from "./Modal"; // Mengimpor komponen Modal
 
+// Komponen Profile untuk menampilkan dan mengelola profil pengguna
 const Profile = () => {
+  // State untuk menyimpan data profil dan form
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +22,7 @@ const Profile = () => {
 
   const history = useHistory();
 
+  // Validator untuk form validasi
   const validator = new FormValidator([
     {
       field: "password",
@@ -47,6 +50,7 @@ const Profile = () => {
     },
   ]);
 
+  // useEffect untuk mendapatkan profil pengguna ketika komponen di-mount
   useEffect(() => {
     const token = localStorage.usertoken;
     if (token) {
@@ -65,6 +69,7 @@ const Profile = () => {
     }
   }, [history]);
 
+  // Fungsi untuk menangani perubahan input pada form
   const onChange = (e) => {
     const { name, value } = e.target;
     if (name === "password") setPassword(value);
@@ -72,9 +77,11 @@ const Profile = () => {
     if (name === "confirmPassword") setConfirmPassword(value);
   };
 
+  // Fungsi untuk menangani submit form
   const onSubmit = (e) => {
     e.preventDefault();
 
+    // Melakukan validasi form
     const validationResults = validator.validate({
       password,
       newPassword,
@@ -82,6 +89,7 @@ const Profile = () => {
     });
     setValidation(validationResults);
 
+    // Jika validasi berhasil, maka lakukan update password
     if (validationResults.isValid) {
       const formData = {
         email,
@@ -92,7 +100,7 @@ const Profile = () => {
       updatePassword(formData)
         .then((res) => {
           setMessage(res.message);
-          setShowModal(false); // Close modal on successful update
+          setShowModal(false); // Tutup modal jika update berhasil
         })
         .catch((err) => {
           setMessage(err.message);
@@ -104,6 +112,7 @@ const Profile = () => {
     <div className="bg-[#F4D4B6] h-[calc(100vh-72px)] lg:h-[calc(100vh-76px)] py-12 grid">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full gap-8">
+          {/* Kolom pertama yang berisi gambar dan teks */}
           <div className="w-full h-full bg-[#EDBD97] rounded-xl grid justify-items-center items-center order-2 lg:order-1">
             <div className="flex items-center flex-col gap-6">
               <img
@@ -118,6 +127,7 @@ const Profile = () => {
               </div>
             </div>
           </div>
+          {/* Kolom kedua yang berisi informasi profil dan form update password */}
           <div className="grid items-center order-1 lg:order-2 h-full bg-white rounded-lg shadow-md">
             <div className="container h-full">
               <div className="p-6 h-full flex flex-col justify-between">
@@ -151,7 +161,7 @@ const Profile = () => {
                   Change Password
                 </button>
 
-                {/* Modal for Password Update */}
+                {/* Modal untuk form update password */}
                 <Modal showModal={showModal} setShowModal={setShowModal}>
                   <form onSubmit={onSubmit}>
                     <div className="mb-4">
@@ -245,4 +255,5 @@ const Profile = () => {
   );
 };
 
+// Ekspor komponen Profile untuk digunakan di tempat lain
 export default Profile;

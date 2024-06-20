@@ -1,161 +1,181 @@
-var express = require('express')
-var tasks = express.Router()
-const cors = require('cors')
-const jwt = require('jsonwebtoken')
+// Mengimpor library yang diperlukan
+var express = require("express");
+var tasks = express.Router(); // Membuat router untuk task
+const cors = require("cors"); // Mengimpor middleware CORS
+const jwt = require("jsonwebtoken"); // Mengimpor library JWT untuk otentikasi
 
-const Task = require('../models/Task')
+const Task = require("../models/Task"); // Mengimpor model Task
 
-tasks.use(cors())
+tasks.use(cors()); // Menggunakan middleware CORS
 
-process.env.SECRET_KEY = 'secret'
+// Menetapkan SECRET_KEY untuk JWT
+process.env.SECRET_KEY = "secret";
 
-tasks.get('/tasks', function(req, res, next) {
-  if(req.headers['authorization']){
-    var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY)
+// Mendefinisikan endpoint untuk mendapatkan semua tasks berdasarkan user_id dari token
+tasks.get("/tasks", function (req, res, next) {
+  if (req.headers["authorization"]) {
+    // Mengecek apakah ada token dalam header
+    var decoded = jwt.verify(
+      req.headers["authorization"],
+      process.env.SECRET_KEY
+    ); // Mendekode token
     Task.findAll({
       where: {
-        user_id: decoded.id
-      }
+        user_id: decoded.id, // Mengambil tasks berdasarkan user_id dari token
+      },
     })
-      .then(tasks => {
-        res.json(tasks)
+      .then((tasks) => {
+        res.json(tasks); // Mengirimkan response dengan data tasks
       })
-      .catch(err => {
-        res.send('error: ' + err)
-      })
-  }else{
-    res.json({status:'failed',message:'Token not passed !'})
+      .catch((err) => {
+        res.send("error: " + err); // Mengirimkan error jika terjadi kesalahan
+      });
+  } else {
+    res.json({ status: "failed", message: "Token not passed !" }); // Mengirimkan response jika token tidak ada
     console.log("Token Not Passed");
   }
-})
+});
 
-tasks.get('/task/:id', function(req, res, next) {
-  if(req.headers['authorization']){
+// Mendefinisikan endpoint untuk mendapatkan task berdasarkan id
+tasks.get("/task/:id", function (req, res, next) {
+  if (req.headers["authorization"]) {
+    // Mengecek apakah ada token dalam header
     Task.findOne({
       where: {
-        id: req.params.id
-      }
+        id: req.params.id, // Mengambil task berdasarkan id dari parameter URL
+      },
     })
-      .then(task => {
+      .then((task) => {
         if (task) {
-          res.json(task)
+          res.json(task); // Mengirimkan response dengan data task
         } else {
-          res.send('Task does not exist')
+          res.send("Task does not exist"); // Mengirimkan response jika task tidak ditemukan
         }
       })
-      .catch(err => {
-        res.send('error: ' + err)
-      })
-  }else{
-    res.json({status:'failed',message:'Token not passed !'})
+      .catch((err) => {
+        res.send("error: " + err); // Mengirimkan error jika terjadi kesalahan
+      });
+  } else {
+    res.json({ status: "failed", message: "Token not passed !" }); // Mengirimkan response jika token tidak ada
     console.log("Token Not Passed");
   }
-})
+});
 
-tasks.post('/task', function(req, res, next) {
-  if(req.headers['authorization']){
+// Mendefinisikan endpoint untuk membuat task baru
+tasks.post("/task", function (req, res, next) {
+  if (req.headers["authorization"]) {
+    // Mengecek apakah ada token dalam header
     if (!req.body.name && !req.body.status) {
-      res.status(400)
+      res.status(400);
       res.json({
-        error: 'Bad Data'
-      })
+        error: "Bad Data", // Mengirimkan response jika data tidak lengkap
+      });
     } else {
-      var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY)
+      var decoded = jwt.verify(
+        req.headers["authorization"],
+        process.env.SECRET_KEY
+      ); // Mendekode token
       const user_id = decoded.id;
-      req.body.user_id = user_id;
-      console.log("req-body",req.body);
-      Task.create(req.body)
-        .then(data => {
-          res.send(data)
+      req.body.user_id = user_id; // Menambahkan user_id ke body request
+      console.log("req-body", req.body);
+      Task.create(req.body) // Membuat task baru dengan data dari body request
+        .then((data) => {
+          res.send(data); // Mengirimkan response dengan data task yang baru dibuat
         })
-        .catch(err => {
-          res.json('error: ' + err)
-        })
+        .catch((err) => {
+          res.json("error: " + err); // Mengirimkan error jika terjadi kesalahan
+        });
     }
-  }
-  else{
-    res.json({status:'failed',message:'Token not passed !'})
+  } else {
+    res.json({ status: "failed", message: "Token not passed !" }); // Mengirimkan response jika token tidak ada
     console.log("Token Not Passed");
   }
-})
+});
 
-tasks.delete('/task/:id', function(req, res, next) {
-  if(req.headers['authorization']){
-
-    var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY)
-      console.log("user_decoded_id",decoded.id);
-      Task.findOne({
-        where: {
-          user_id: decoded.id,
-          id:req.params.id
-        }
-      })
-      .then(task => {
+// Mendefinisikan endpoint untuk menghapus task berdasarkan id
+tasks.delete("/task/:id", function (req, res, next) {
+  if (req.headers["authorization"]) {
+    // Mengecek apakah ada token dalam header
+    var decoded = jwt.verify(
+      req.headers["authorization"],
+      process.env.SECRET_KEY
+    ); // Mendekode token
+    console.log("user_decoded_id", decoded.id);
+    Task.findOne({
+      where: {
+        user_id: decoded.id, // Mengecek apakah task milik user yang terotentikasi
+        id: req.params.id,
+      },
+    })
+      .then((task) => {
         if (task) {
           Task.destroy({
             where: {
-              id: req.params.id
-            }
+              id: req.params.id, // Menghapus task berdasarkan id
+            },
           })
-          .then(() => {
-            res.json({ status: 'Task Deleted!' })
-          })
-          .catch(err => {
-            res.send('error: ' + err)
-          })
-        }else{
-          res.json({ status: 'failed', message:'Task not found' })
+            .then(() => {
+              res.json({ status: "Task Deleted!" }); // Mengirimkan response jika task berhasil dihapus
+            })
+            .catch((err) => {
+              res.send("error: " + err); // Mengirimkan error jika terjadi kesalahan
+            });
+        } else {
+          res.json({ status: "failed", message: "Task not found" }); // Mengirimkan response jika task tidak ditemukan
         }
-    }).catch(err => {
-      res.json({ status: 'failed', message:'Task not found' })
-    })
-
-  }else{
-      res.json({status:'failed',message:'Token not passed !'})
-      console.log("Token Not Passed");
-  }
-})
-
-tasks.put('/task/:id', function(req, res, next) {
-  if(req.headers['authorization']){
-    if (!req.body.name && !req.body.status) {
-      res.status(400)
-      res.json({
-        error: 'Bad Data'
       })
-    } else {
+      .catch((err) => {
+        res.json({ status: "failed", message: "Task not found" }); // Mengirimkan response jika terjadi kesalahan
+      });
+  } else {
+    res.json({ status: "failed", message: "Token not passed !" }); // Mengirimkan response jika token tidak ada
+    console.log("Token Not Passed");
+  }
+});
 
-      var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY)
-      console.log("user_decoded_id",decoded.id);
+// Mendefinisikan endpoint untuk memperbarui task berdasarkan id
+tasks.put("/task/:id", function (req, res, next) {
+  if (req.headers["authorization"]) {
+    // Mengecek apakah ada token dalam header
+    if (!req.body.name && !req.body.status) {
+      res.status(400);
+      res.json({
+        error: "Bad Data", // Mengirimkan response jika data tidak lengkap
+      });
+    } else {
+      var decoded = jwt.verify(
+        req.headers["authorization"],
+        process.env.SECRET_KEY
+      ); // Mendekode token
+      console.log("user_decoded_id", decoded.id);
       Task.findOne({
         where: {
-          user_id: decoded.id,
-          id:req.params.id
-        }
+          user_id: decoded.id, // Mengecek apakah task milik user yang terotentikasi
+          id: req.params.id,
+        },
       })
-        .then(task => {
+        .then((task) => {
           if (task) {
             Task.update(
-              { name: req.body.name, status: req.body.status },
+              { name: req.body.name, status: req.body.status }, // Memperbarui task dengan data baru
               { where: { id: req.params.id } }
             )
               .then(() => {
-                res.json({ status: 'success', message:'Task Updated !' })
+                res.json({ status: "success", message: "Task Updated !" }); // Mengirimkan response jika task berhasil diperbarui
               })
-              .error(err => handleError(err))
-          }else{
-            res.json({ status: 'failed', message:'Task not found' })
+              .error((err) => handleError(err)); // Menangani error jika terjadi kesalahan
+          } else {
+            res.json({ status: "failed", message: "Task not found" }); // Mengirimkan response jika task tidak ditemukan
           }
-        }).catch(err => {
-          res.json({ status: 'failed', message:'Task not found' })
         })
-
+        .catch((err) => {
+          res.json({ status: "failed", message: "Task not found" }); // Mengirimkan response jika terjadi kesalahan
+        });
     }
-  }
-  else{
-    res.json({status:'failed',message:'Token not passed !'})
+  } else {
+    res.json({ status: "failed", message: "Token not passed !" }); // Mengirimkan response jika token tidak ada
     console.log("Token Not Passed");
   }
-})
+});
 
-module.exports = tasks
+module.exports = tasks; // Mengekspor router tasks
